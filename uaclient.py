@@ -35,13 +35,15 @@ SIP_type = {
 def msg_constructor():
     u"""Función constructora de mensajes."""
     if METHOD == "REGSITER":
-        msg = METHOD + " sip:" + login + ":" port + " SIP/2.0" + "\r\n" +
-        "Expires: " + OPTION + "\r\n")
+        msg = METHOD + " sip:" + CONF[account_username] + ":" \
+        + CONF[uaserver_puerto] + " SIP/2.0" + "\r\n" + \
+        "Expires: " + OPTION + "\r\n"
     elif METHOD == "INVITE":
-        head = METHOD +" sip:" + OPTION + ":" port + " SIP/2.0" + "\r\n"
+        head = METHOD +" sip:" + OPTION + ":" + CONF[uaserver_puerto] + \
+        " SIP/2.0" + "\r\n"
         content_type = "content_type: application/sdp" +"\r\n\r\n"
         v = "v=0"
-        o = "o=" CONF["account_username"] + CONF["userserver_ip"] + "\r\n"
+        o = "o=" + CONF["account_username"] + CONF["uaserver_ip"] + "\r\n"
         s = "s= misesion" + "\r\n"
         t = "t=0" + "\r\n"
         m = "m=audio" + CONF["rtpaudio_puerto"] + "RTP" + "\r\n"
@@ -64,7 +66,7 @@ def comunication():
         msg_to_send = msg_constructor()
         my_socket.send(bytes(msg_to_send, 'utf-8') + b'\r\n')
         print("Enviando: " + msg_to_send)
-        data = my_socket.recv(1025)
+        data = my_socket.recv(1024)
         print('Recibido -- ', data.decode('utf-8'))
 
 
@@ -98,13 +100,11 @@ if __name__ == '__main__':
         sys.exit("Usage: python uaclient.py config method option")
 
     try:
-        pass
-        #comunication(server, port, sip_type, login)
+        parser = make_parser()
+        cHandler = XMLHandler()
+        parser.setContentHandler(cHandler)
+        parser.parse(open(CONFIG))
+        CONF = cHandler.get_tags()
+        comunication()
     except socket.gaierror:
         sys.exit("Usage: python uaclient.py config method option")
-
-    parser = make_parser()
-    cHandler = XMLHandler()
-    parser.setContentHandler(cHandler)
-    parser.parse(open(CONFIG))
-    CONF = cHandler.get_tags()
