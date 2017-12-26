@@ -34,6 +34,7 @@ SIP_type = {
 
 def msg_constructor():
     u"""Función constructora de mensajes."""
+    msg = ""
     if METHOD == "REGSITER":
         msg = METHOD + " sip:" + CONF[account_username] + ":" \
         + CONF[uaserver_puerto] + " SIP/2.0" + "\r\n" + \
@@ -53,7 +54,6 @@ def msg_constructor():
 
     return msg
 
-
 def comunication():
     u"""Comunicación cliente/servidor.
 
@@ -62,11 +62,16 @@ def comunication():
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as my_socket:
 
         my_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        my_socket.connect((CONF[regproxy_ip], CONF[regproxy_port]))
+        my_socket.connect((CONF["regproxy_ip"],int(CONF["regproxy_puerto"])))
         msg_to_send = msg_constructor()
         my_socket.send(bytes(msg_to_send, 'utf-8') + b'\r\n')
-        print("Enviando: " + msg_to_send)
-        data = my_socket.recv(1024)
+        try:
+            data = my_socket.recv(1024)
+            print("Enviando: " + msg_to_send)
+        except ConnectionRefusedError:
+            sys.exit ("Error: No server listening at " + CONF["regproxy_ip"] +
+            " port " + CONF["regproxy_puerto"])
+
         print('Recibido -- ', data.decode('utf-8'))
 
 
