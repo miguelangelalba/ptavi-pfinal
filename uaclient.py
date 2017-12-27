@@ -27,7 +27,7 @@ def msg_constructor():
     if METHOD == "REGISTER":
         msg = METHOD + " sip:" + CONF["account_username"] + ":" \
         + CONF["uaserver_puerto"] + " SIP/2.0" + "\r\n" + \
-        "Expires: " + OPTION + "\r\n"
+        "Expires: " + OPTION + " \r\n"
     elif METHOD == "INVITE":
         head = METHOD +" sip:" + OPTION + ":" + CONF["uaserver_puerto"] + \
         " SIP/2.0" + "\r\n"
