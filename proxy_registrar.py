@@ -9,9 +9,9 @@ from xml.sax.handler import ContentHandler
 #from uaclient import XMLHandler
 
 etiquetas = {
-    "server":["name", "ip", "puerto"],
-    "database":["path", "passwdpath"],
-    "log":["path"]
+    "server": ["name", "ip", "puerto"],
+    "database": ["path", "passwdpath"],
+    "log": ["path"]
 }
 
 answer_code = {
@@ -35,7 +35,6 @@ SIP_type = {
 SIP_metodo = ["INVITE", "BYE", "ACK", "REGISTER"]
 
 
-
 class SIPRegisterHandler(socketserver.DatagramRequestHandler):
     """Echo server class."""
     def handle(self):
@@ -49,18 +48,17 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
         if not line[0] in SIP_metodo:
             msg = answer_code["Method Not Allowed"]
         elif line[0] == "REGISTER":
-            if len(line) == 4 :
+            if len(line) == 4:
                 msg = answer_code["Unauthorized"]
             else:
                 msg = answer_code["Ok"]
-
 
         self.wfile.write(msg)
         print("El cliente ha mandado " + line[0])
 
 class XMLHandler(ContentHandler):
     """Constructor XML"""
-    def __init__(self,etique):
+    def __init__(self, etique):
         self.XML = {}
         self.etiquetas = etique
 
@@ -90,6 +88,8 @@ if __name__ == "__main__":
     parser.setContentHandler(cHandler)
     parser.parse(open(CONFIG))
     CONF = cHandler.get_tags()
+    if CONF["server_ip"] == "":
+        CONF["server_ip"] = "127.0.0.1"
     print (CONF)
 
     #SIPRegisterHandler.json2registered()
