@@ -5,6 +5,7 @@ import socket
 import socketserver
 import sys
 import time
+import json
 from xml.sax import make_parser
 from xml.sax.handler import ContentHandler
 #from uaclient import XMLHandler
@@ -40,6 +41,20 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
     """Echo server class."""
     users = {}
 
+    def deluser(self,line):
+
+        del_users = []
+        cliente = line[1][line[1].find(":") + 1:line[1].rfind(":")]
+        if int(line[3]) == 0:
+            del self.users[cliente]
+        self.wfile.write(b"SIP/2.0 200 OK\r\n\r\n")
+        for user in self.users:
+            if self.users[user]["expires"] < time_now:
+                del_users.append(user)
+        for user in del_users:
+            del self.users[user]
+
+
     def registrarse (self, line):
         cliente = line[1][line[1].find(":") + 1:line[1].rfind(":")]
         ip = "127.0.0.1"
@@ -72,11 +87,26 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
                 msg = answer_code["Unauthorized"]
             else:
                 #falta el SDP
-                self.registrarse(line)
-                msg = answer_code["Ok"]
+                if int(line[3]) == 0:
+                    self.registrarse(line)
+                    self.deluser(line)
+                    msg = answer_code["Ok"]
+                else:
+                    self.registrarse(line)
+                    msg = answer_code["Ok"]
+                self.register2json()
 
         self.wfile.write(msg)
         print("El cliente ha mandado " + line[0])
+
+    def register2json(self):
+        """Crea un archivo .json del dicionario de usuarios."""
+        with open("registered.json", "w") as fich_json:
+            json.dump(
+                self.users,
+                fich_json,
+                sort_keys=True,
+                indent=4, separators=(',', ': '))
 
 class XMLHandler(ContentHandler):
     """Constructor XML"""
