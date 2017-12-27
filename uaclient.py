@@ -18,14 +18,6 @@ etiquetas = {
 }
 
 
-answer_code = {
-    "Trying": b"SIP/2.0 100 Trying\r\n\r\n",
-    "Ringing": b"SIP/2.0 180 Ringing\r\n\r\n",
-    "Ok": b"SIP/2.0 200 OK\r\n\r\n",
-    "Bad Request": b"SIP/2.0 400 Bad Request\r\n\r\n",
-    "Method Not Allowed": b"SIP/2.0 405 Method Not Allowed\r\n\r\n"
-    }
-
 SIP_type = {
     "BYE": answer_code["Ok"],
     "ACK": answer_code["Ok"]
@@ -77,21 +69,24 @@ def comunication():
 
 class XMLHandler(ContentHandler):
     """Constructor XML"""
-    def __init__(self):
+    def __init__(self,etique):
         self.XML = {}
-
+        self.etiquetas = etique
 
     def get_tags(self):
         return self.XML
 
     def startElement(self, name, attrs):
-        if name not in etiquetas.keys():
+        if name not in self.etiquetas.keys():
             return
 
-        for atributo in etiquetas[name]:
+        for atributo in self.etiquetas[name]:
             #Identifico la etiqueta y el argumento en la misma línea
             #Lo meto en un diccionario
             self.XML[name + "_" + atributo] = attrs.get(atributo, "")
+            #Esta linea la dejo para un futuro
+            #if self.XML["uaserver_ip"] == ""
+            #    self.XML["uaserver_ip"] = "127.0.0.1"
 
 if __name__ == '__main__':
 
@@ -106,10 +101,11 @@ if __name__ == '__main__':
 
     try:
         parser = make_parser()
-        cHandler = XMLHandler()
+        cHandler = XMLHandler(etiquetas)
         parser.setContentHandler(cHandler)
         parser.parse(open(CONFIG))
         CONF = cHandler.get_tags()
+        print(CONF)
         comunication()
     except socket.gaierror:
         sys.exit("Usage: python uaclient.py config method option")
