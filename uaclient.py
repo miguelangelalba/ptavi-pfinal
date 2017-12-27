@@ -6,6 +6,8 @@ import socket
 import sys
 from xml.sax import make_parser
 from xml.sax.handler import ContentHandler
+from proxy_registrar import XMLHandler
+from proxy_registrar import answer_code
 
 
 etiquetas = {
@@ -58,30 +60,18 @@ def comunication():
         except ConnectionRefusedError:
             sys.exit ("Error: No server listening at " + CONF["regproxy_ip"] +
             " port " + CONF["regproxy_puerto"])
+        print('Recibido -- ', data.decode('utf-8'))
+        if data == answer_code["Unauthorized"]:
+            ath = "Authorization: Digest response=123123212312321212123"
+            msg = msg_constructor() + ath
 
+        print("Enviando: " + msg)
+        my_socket.send(bytes(msg, 'utf-8') + b'\r\n')
+        data = my_socket.recv(1024)
         print('Recibido -- ', data.decode('utf-8'))
 
 
-class XMLHandler(ContentHandler):
-    """Constructor XML"""
-    def __init__(self,etique):
-        self.XML = {}
-        self.etiquetas = etique
 
-    def get_tags(self):
-        return self.XML
-
-    def startElement(self, name, attrs):
-        if name not in self.etiquetas.keys():
-            return
-
-        for atributo in self.etiquetas[name]:
-            #Identifico la etiqueta y el argumento en la misma línea
-            #Lo meto en un diccionario
-            self.XML[name + "_" + atributo] = attrs.get(atributo, "")
-            #Esta linea la dejo para un futuro
-            #if self.XML["uaserver_ip"] == ""
-            #    self.XML["uaserver_ip"] = "127.0.0.1"
 
 if __name__ == '__main__':
 

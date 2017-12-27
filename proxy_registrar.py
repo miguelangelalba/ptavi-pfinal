@@ -6,7 +6,7 @@ import socketserver
 import sys
 from xml.sax import make_parser
 from xml.sax.handler import ContentHandler
-from uaclient import XMLHandler
+#from uaclient import XMLHandler
 
 etiquetas = {
     "server":["name", "ip", "puerto"],
@@ -19,7 +19,8 @@ answer_code = {
     "Ringing": b"SIP/2.0 180 Ringing\r\n\r\n",
     "Ok": b"SIP/2.0 200 OK\r\n\r\n",
     "Bad Request": b"SIP/2.0 400 Bad Request\r\n\r\n",
-    "Unauthorized": b"SIP/2.0 401 Unauthorized\r\n\r\n",
+    "Unauthorized": b"SIP/2.0 401 Unauthorized\r\n" +
+    b"www Authenticate: Digest nonce=8989898989898989898989898989 \r\n\r\n",
     "User Not Found": b"SIP/2.0 404 User Not Found\r\n\r\n",
     "Method Not Allowed": b"SIP/2.0 405 Method Not Allowed\r\n\r\n"
     }
@@ -46,14 +47,37 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
         """
         line = self.rfile.read().decode('utf-8').split(" ")
         if not line[0] in SIP_metodo:
-            self.wfile.write(answer_code["Method Not Allowed"])
+            msg = answer_code["Method Not Allowed"]
         elif line[0] == "REGISTER":
-            self.wfile.write(answer_code["Unauthorized"])
+            if len(line) == 4 :
+                msg = answer_code["Unauthorized"]
+            else:
+                msg = answer_code["Ok"]
 
+
+        self.wfile.write(msg)
         print("El cliente ha mandado " + line[0])
 
+class XMLHandler(ContentHandler):
+    """Constructor XML"""
+    def __init__(self,etique):
+        self.XML = {}
+        self.etiquetas = etique
 
+    def get_tags(self):
+        return self.XML
 
+    def startElement(self, name, attrs):
+        if name not in self.etiquetas.keys():
+            return
+
+        for atributo in self.etiquetas[name]:
+            #Identifico la etiqueta y el argumento en la misma línea
+            #Lo meto en un diccionario
+            self.XML[name + "_" + atributo] = attrs.get(atributo, "")
+            #Esta linea la dejo para un futuro
+            #if self.XML["uaserver_ip"] == ""
+            #    self.XML["uaserver_ip"] = "127.0.0.1"
 
 if __name__ == "__main__":
 
