@@ -4,6 +4,7 @@
 import socket
 import socketserver
 import sys
+import time
 from xml.sax import make_parser
 from xml.sax.handler import ContentHandler
 #from uaclient import XMLHandler
@@ -37,6 +38,23 @@ SIP_metodo = ["INVITE", "BYE", "ACK", "REGISTER"]
 
 class SIPRegisterHandler(socketserver.DatagramRequestHandler):
     """Echo server class."""
+    users = {}
+
+    def registrarse (self, line):
+        cliente = line[1][line[1].find(":") + 1:line[1].rfind(":")]
+        ip = "127.0.0.1"
+        puerto = line[1][line[1].rfind(":") + 1:]
+        expires_time = time.gmtime(int(time.time()) + int(line[3]))
+        usuario = {
+            "ip": ip,
+            "puerto": puerto,
+            "expires": time.strftime("%Y-%m-%d %H:%M:%S", expires_time)
+            }
+        self.users[cliente] = usuario
+
+        print (self.users)
+
+
     def handle(self):
         u"""Handle method of the server class.
 
@@ -45,12 +63,16 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
         con los diccionarios definidos arriba.
         """
         line = self.rfile.read().decode('utf-8').split(" ")
+        time_now = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time.time()))
+
         if not line[0] in SIP_metodo:
             msg = answer_code["Method Not Allowed"]
         elif line[0] == "REGISTER":
-            if len(line) == 4:
+            if len(line) == 5:
                 msg = answer_code["Unauthorized"]
             else:
+                #falta el SDP
+                self.registrarse(line)
                 msg = answer_code["Ok"]
 
         self.wfile.write(msg)
@@ -103,4 +125,4 @@ if __name__ == "__main__":
         serv.serve_forever()
 
     except KeyboardInterrupt:
-        print("Finalizado servidor")
+        print("Finalizado proxy_registrar")
