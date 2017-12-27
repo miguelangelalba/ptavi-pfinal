@@ -1,0 +1,5 @@
+<config>
+    <server name="alumnosurjc" ip="127.0.0.1" puerto="5001"/>
+    <database path="database" passwdpath="passwd"/>
+    <log path="proxy_log.txt"/>
+</config>
