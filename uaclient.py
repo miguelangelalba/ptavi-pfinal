@@ -18,21 +18,16 @@ etiquetas = {
 }
 
 
-SIP_type = {
-    "BYE": answer_code["Ok"],
-    "ACK": answer_code["Ok"]
-    }
-
 
 def msg_constructor():
     u"""Función constructora de mensajes."""
     msg = ""
-    if METHOD == "REGSITER":
-        msg = METHOD + " sip:" + CONF[account_username] + ":" \
-        + CONF[uaserver_puerto] + " SIP/2.0" + "\r\n" + \
+    if METHOD == "REGISTER":
+        msg = METHOD + " sip:" + CONF["account_username"] + ":" \
+        + CONF["uaserver_puerto"] + " SIP/2.0" + "\r\n" + \
         "Expires: " + OPTION + "\r\n"
     elif METHOD == "INVITE":
-        head = METHOD +" sip:" + OPTION + ":" + CONF[uaserver_puerto] + \
+        head = METHOD +" sip:" + OPTION + ":" + CONF["uaserver_puerto"] + \
         " SIP/2.0" + "\r\n"
         content_type = "content_type: application/sdp" +"\r\n\r\n"
         v = "v=0"
