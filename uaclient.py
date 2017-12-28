@@ -32,11 +32,11 @@ def msg_constructor():
         head = METHOD +" sip:" + OPTION + ":" + CONF["uaserver_puerto"] + \
         " SIP/2.0" + "\r\n"
         content_type = "content_type: application/sdp" +"\r\n\r\n"
-        v = "v=0"
-        o = "o=" + CONF["account_username"] + CONF["uaserver_ip"] + "\r\n"
+        v = "v=0" + "\r\n"
+        o = "o=" + CONF["account_username"] +" "+ CONF["uaserver_ip"] + "\r\n"
         s = "s= misesion" + "\r\n"
         t = "t=0" + "\r\n"
-        m = "m=audio" + CONF["rtpaudio_puerto"] + "RTP" + "\r\n"
+        m = "m=audio " + CONF["rtpaudio_puerto"] + " RTP" + "\r\n"
         msg = head + content_type + v + o + s + t + m
     elif METHOD == "BYE":
         msg = METHOD + " sip:" + OPTION + "SIP/2.0" + "\r\n"
@@ -65,11 +65,10 @@ def comunication():
             ath = "Authorization: Digest response=123123212312321212123"
             msg = msg_constructor() + ath
 
-        print("Enviando: " + msg)
-        my_socket.send(bytes(msg, 'utf-8') + b'\r\n')
-        data = my_socket.recv(1024)
-        print('Recibido -- ', data.decode('utf-8'))
-
+            print("Enviando: " + msg)
+            my_socket.send(bytes(msg, 'utf-8') + b'\r\n')
+            data = my_socket.recv(1024)
+            print('Recibido -- ', data.decode('utf-8'))
 
 
 
