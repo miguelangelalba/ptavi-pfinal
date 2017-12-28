@@ -41,10 +41,17 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
     """Echo server class."""
     users = {}
 
-    def deluser(self,line, time_now):
+    def find_user(self,cliente):
+
+        if not cliente in self.users.keys():
+            return False
+        else:
+            return True
+
+    def deluser(self, cliente, line, time_now):
 
         del_users = []
-        cliente = line[1][line[1].find(":") + 1:line[1].rfind(":")]
+        #cliente = line[1][line[1].find(":") + 1:line[1].rfind(":")]
         if int(line[3]) == 0:
             del self.users[cliente]
         self.wfile.write(b"SIP/2.0 200 OK\r\n\r\n")
@@ -55,9 +62,9 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
             del self.users[user]
 
 
-    def registrarse (self, line):
-        cliente = line[1][line[1].find(":") + 1:line[1].rfind(":")]
-        ip = "127.0.0.1"
+    def registrarse (self, cliente, line):
+        #cliente = line[1][line[1].find(":") + 1:line[1].rfind(":")]
+        ip = self.client_address[0]
         puerto = line[1][line[1].rfind(":") + 1:]
         expires_time = time.gmtime(int(time.time()) + int(line[3]))
         usuario = {
@@ -79,6 +86,7 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
         """
         line = self.rfile.read().decode('utf-8').split(" ")
         time_now = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time.time()))
+        cliente = line[1][line[1].find(":") + 1:line[1].rfind(":")]
 
         if not line[0] in SIP_metodo:
             msg = answer_code["Method Not Allowed"]
@@ -88,14 +96,22 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
             else:
                 #falta el SDP
                 if int(line[3]) == 0:
-                    self.registrarse(line)
-                    self.deluser(line,time_now)
+                    self.registrarse(cliente, line)
+                    self.deluser(cliente, line, time_now)
                     msg = answer_code["Ok"]
                 else:
-                    self.registrarse(line)
-                    self.deluser(line,time_now)
+                    self.registrarse(cliente, line)
+                    self.deluser(cliente, line, time_now)
                     msg = answer_code["Ok"]
                 self.register2json()
+        elif line[0] == "INVITE":
+            if self.find_user(cliente) == False:
+                msg = answer_code["User Not Found"]
+            else:
+                msg = b"Usuario encontrado"
+
+
+
 
         self.wfile.write(msg)
         print("El cliente ha mandado " + line[0])
