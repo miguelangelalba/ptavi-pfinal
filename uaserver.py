@@ -32,9 +32,11 @@ class SIPServer(socketserver.DatagramRequestHandler):
         RTP_receiver = ""
         line = self.rfile.read().decode('utf-8').split(" ")
         if not line[0] in SIP_type:
+            print ("Metodo no encontrado")
             self.wfile.write(answer_code["Method Not Allowed"])
         elif line[0] == "INVITE":
-            RTP_receiver = int(line[6])
+            print (line[7])
+            RTP_receiver = int(line[7])
 
             v = "v=0" + "\r\n"
             o = " o=" + CONF["account_username"] + " " + CONF["uaserver_ip"] +\
@@ -43,7 +45,7 @@ class SIPServer(socketserver.DatagramRequestHandler):
             t = "t=0" + "\r\n"
             m = "m=audio " + CONF["rtpaudio_puerto"] + " RTP" + "\r\n"
             sdp = v + o + s + t + m
-            msg = SIP_type["INVITE"] + sdp
+            msg = SIP_type["INVITE"] + bytes(sdp, 'utf-8')
             self.wfile.write(msg)
 
         elif line[0] == "ACK":

@@ -89,6 +89,7 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
         Compruebo los métodos y mando las respuestas asociadas a cada método
         con los diccionarios definidos arriba.
         """
+        line_to_send = self.rfile
         line = self.rfile.read().decode('utf-8').split(" ")
         time_now = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time.time()))
         cliente = line[1][line[1].find(":") + 1:line[1].rfind(":")]
@@ -120,7 +121,7 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
                 if self.find_user(cliente) is False:
                     msg = answer_code["User Not Found"]
                 else:
-                    msg_to_send = str(line)
+                    msg_to_send = " ".join(line)
                     msg = self.comunication(
                     msg_to_send, self.users[cliente]["ip"],
                     self.users[cliente]["puerto"]
