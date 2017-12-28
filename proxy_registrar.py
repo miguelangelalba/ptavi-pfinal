@@ -75,6 +75,13 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
 
         print (self.users)
 
+    def comunication (self,msg_to_send,ip,port):
+        my_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        my_socket.connect((ip,int(port)))
+        my_socket.send(bytes(msg_to_send, 'utf-8') + b'\r\n')
+
+        return my_socket.recv(1024)
+
 
     def handle(self):
         u"""Handle method of the server class.
@@ -112,7 +119,9 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
                 if self.find_user(cliente) == False:
                     msg = answer_code["User Not Found"]
                 else:
-                    msg = b"Usuario encontrado"
+                    msg_to_send = line
+                    msg = self.comunication(msg_to_send, \
+                    self.users[cliente]["ip"],self.users[cliente]["puerto"])
 
         self.wfile.write(msg)
         print("El cliente ha mandado " + line[0])
