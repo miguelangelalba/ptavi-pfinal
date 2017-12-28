@@ -64,11 +64,10 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
 
     def registrarse (self, cliente, line):
         #cliente = line[1][line[1].find(":") + 1:line[1].rfind(":")]
-        ip = self.client_address[0]
         puerto = line[1][line[1].rfind(":") + 1:]
         expires_time = time.gmtime(int(time.time()) + int(line[3]))
         usuario = {
-            "ip": ip,
+            "ip": self.client_address[0],
             "puerto": puerto,
             "expires": time.strftime("%Y-%m-%d %H:%M:%S", expires_time)
             }
@@ -105,13 +104,15 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
                     msg = answer_code["Ok"]
                 self.register2json()
         elif line[0] == "INVITE":
-            if self.find_user(cliente) == False:
-                msg = answer_code["User Not Found"]
+            o = line[4][line[4].find("=") + 1:]
+            print(o)
+            if self.find_user(0) == False:
+                msg = answer_code["Unauthorized"]
             else:
-                msg = b"Usuario encontrado"
-
-
-
+                if self.find_user(cliente) == False:
+                    msg = answer_code["User Not Found"]
+                else:
+                    msg = b"Usuario encontrado"
 
         self.wfile.write(msg)
         print("El cliente ha mandado " + line[0])
