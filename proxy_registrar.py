@@ -41,7 +41,7 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
     """Echo server class."""
     users = {}
 
-    def deluser(self,line):
+    def deluser(self,line, time_now):
 
         del_users = []
         cliente = line[1][line[1].find(":") + 1:line[1].rfind(":")]
@@ -89,10 +89,11 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
                 #falta el SDP
                 if int(line[3]) == 0:
                     self.registrarse(line)
-                    self.deluser(line)
+                    self.deluser(line,time_now)
                     msg = answer_code["Ok"]
                 else:
                     self.registrarse(line)
+                    self.deluser(line,time_now)
                     msg = answer_code["Ok"]
                 self.register2json()
 
