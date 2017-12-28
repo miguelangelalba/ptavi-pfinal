@@ -37,7 +37,7 @@ class SIPServer(socketserver.DatagramRequestHandler):
             RTP_receiver = int(line[6])
 
             v = "v=0" + "\r\n"
-            o = " o=" + CONF["account_username"] + " " + CONF["uaserver_ip"] +
+            o = " o=" + CONF["account_username"] + " " + CONF["uaserver_ip"] +\
             "\r\n"
             s = "s= misesion" + "\r\n"
             t = "t=0" + "\r\n"
@@ -47,7 +47,7 @@ class SIPServer(socketserver.DatagramRequestHandler):
             self.wfile.write(msg)
 
         elif line[0] == "ACK":
-            aEjecutar = "./mp32rtp -i 127.0.0.1 -p" + RTP_receiver + "< " +
+            aEjecutar = "./mp32rtp -i 127.0.0.1 -p" + RTP_receiver + "< " + \
             CONF["audio_path"]
             print("ACK recibido ejecutando:", aEjecutar)
             os.system(aEjecutar)
@@ -55,7 +55,7 @@ class SIPServer(socketserver.DatagramRequestHandler):
         else:
             self.wfile.write(SIP_type[line[0]])
 
-        print("El cliente ha mandado " + line[0])
+        print("El cliente ha mandado " + str(line))
 
 
 if __name__ == "__main__":

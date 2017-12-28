@@ -24,14 +24,14 @@ def msg_constructor():
     u"""Función constructora de mensajes."""
     msg = ""
     if METHOD == "REGISTER":
-        msg = METHOD + " sip:" + CONF["account_username"] + ":" +
-        CONF["uaserver_puerto"] + " SIP/2.0" + "\r\n" +
+        msg = METHOD + " sip:" + CONF["account_username"] + ":" + \
+        CONF["uaserver_puerto"] + " SIP/2.0" + "\r\n" + \
         "Expires: " + OPTION + " \r\n"
     elif METHOD == "INVITE":
         head = METHOD + " sip:" + OPTION + " SIP/2.0" + "\r\n"
         content_type = "content_type: application/sdp" + "\r\n\r\n"
         v = "v=0" + "\r\n"
-        o = " o=" + CONF["account_username"] + " " + CONF["uaserver_ip"] +
+        o = " o=" + CONF["account_username"] + " " + CONF["uaserver_ip"] + \
         "\r\n"
         s = "s= misesion" + "\r\n"
         t = "t=0" + "\r\n"
@@ -59,7 +59,7 @@ def comunication():
             print("Enviando: " + msg_to_send)
         except ConnectionRefusedError:
             sys.exit(
-            "Error: No server listening at " + CONF["regproxy_ip"] +
+            "Error: No server listening at " + CONF["regproxy_ip"] + \
             " port " + CONF["regproxy_puerto"]
             )
         print('Recibido -- ', data.decode('utf-8'))
