@@ -8,7 +8,6 @@ import time
 import json
 from xml.sax import make_parser
 from xml.sax.handler import ContentHandler
-#from uaclient import XMLHandler
 
 etiquetas = {
     "server": ["name", "ip", "puerto"],
