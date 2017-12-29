@@ -20,14 +20,14 @@ etiquetas = {
 }
 
 
-def msg_constructor():
+def msg_constructor(metodo):
     u"""Función constructora de mensajes."""
     msg = ""
-    if METHOD == "REGISTER":
+    if metodo == "REGISTER":
         msg = METHOD + " sip:" + CONF["account_username"] + ":" + \
         CONF["uaserver_puerto"] + " SIP/2.0" + "\r\n" + \
         "Expires: " + OPTION + " \r\n"
-    elif METHOD == "INVITE":
+    elif metodo == "INVITE":
         head = METHOD + " sip:" + OPTION + " SIP/2.0" + "\r\n"
         content_type = "content_type: application/sdp" + "\r\n\r\n"
         v = "v=0" + "\r\n"
@@ -37,7 +37,9 @@ def msg_constructor():
         t = "t=0" + "\r\n"
         m = "m=audio " + CONF["rtpaudio_puerto"] + " RTP" + "\r\n"
         msg = head + content_type + v + o + s + t + m
-    elif METHOD == "BYE":
+    elif metodo == "ACK":
+        msg = metodo + " sip:" + OPTION + " SIP/2.0" + "\r\n"
+    elif metodo == "BYE":
         msg = METHOD + " sip:" + OPTION + "SIP/2.0" + "\r\n"
 
     return msg
@@ -52,7 +54,7 @@ def comunication():
 
         my_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         my_socket.connect((CONF["regproxy_ip"], int(CONF["regproxy_puerto"])))
-        msg_to_send = msg_constructor()
+        msg_to_send = msg_constructor(METHOD)
         my_socket.send(bytes(msg_to_send, 'utf-8') + b'\r\n')
         try:
             data = my_socket.recv(1024)
@@ -65,10 +67,17 @@ def comunication():
         print('Recibido -- ', data.decode('utf-8'))
         if data == answer_code["Unauthorized"]:
             ath = "Authorization: Digest response=123123212312321212123"
-            msg = msg_constructor() + ath
+            msg = msg_constructor(METHOD) + ath
 
             print("Enviando: " + msg)
             my_socket.send(bytes(msg, 'utf-8') + b'\r\n')
+            data = my_socket.recv(1024)
+            print('Recibido -- ', data.decode('utf-8'))
+
+        else:
+            msg_to_send = msg_constructor("ACK")
+            print("Enviando: " + msg_to_send)
+            my_socket.send(bytes(msg_to_send, 'utf-8') + b'\r\n')
             data = my_socket.recv(1024)
             print('Recibido -- ', data.decode('utf-8'))
 

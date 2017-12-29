@@ -21,6 +21,10 @@ SIP_type = {
 
 class SIPServer(socketserver.DatagramRequestHandler):
     """Echo server class."""
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.RTP_receiver = ""
 
     def handle(self):
         u"""Handle method of the server class.
@@ -29,17 +33,17 @@ class SIPServer(socketserver.DatagramRequestHandler):
         Compruebo los métodos y mando las respuestas asociadas a cada método
         con los diccionarios definidos arriba.
         """
-        RTP_receiver = ""
         line = self.rfile.read().decode('utf-8').split(" ")
         if not line[0] in SIP_type:
             print ("Metodo no encontrado")
             self.wfile.write(answer_code["Method Not Allowed"])
         elif line[0] == "INVITE":
-            print (line[7])
-            RTP_receiver = int(line[7])
+
+            self.RTP_receiver = int(line[7])
+            print ("Puerto RTP:" + str(self.RTP_receiver))
 
             v = "v=0" + "\r\n"
-            o = " o=" + CONF["account_username"] + " " + CONF["uaserver_ip"] +\
+            o = "o=" + CONF["account_username"] + " " + CONF["uaserver_ip"] +\
             "\r\n"
             s = "s= misesion" + "\r\n"
             t = "t=0" + "\r\n"
@@ -49,10 +53,13 @@ class SIPServer(socketserver.DatagramRequestHandler):
             self.wfile.write(msg)
 
         elif line[0] == "ACK":
-            aEjecutar = "./mp32rtp -i 127.0.0.1 -p" + RTP_receiver + "< " + \
+            print ("Puerto ACK RTP:" + self.RTP_receiver)
+            aEjecutar = "./mp32rtp -i 127.0.0.1 -p" + self.RTP_receiver + "< " + \
             CONF["audio_path"]
             print("ACK recibido ejecutando:", aEjecutar)
             os.system(aEjecutar)
+            #self.wfile.write(msg)
+
 
         else:
             self.wfile.write(SIP_type[line[0]])

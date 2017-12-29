@@ -73,10 +73,16 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
 
         print (self.users)
 
+    def comunication_ack(self, msg_to_send, ip, port):
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as my_socket:
+            print("Mandando ACK")
+            my_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            my_socket.connect((ip, int(port)))
+            my_socket.send(bytes(msg_to_send, 'utf-8') + b'\r\n')
+
     def comunication(self, msg_to_send, ip, port):
 
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as my_socket:
-
             my_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             my_socket.connect((ip, int(port)))
             my_socket.send(bytes(msg_to_send, 'utf-8') + b'\r\n')
@@ -93,6 +99,7 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
         line = self.rfile.read().decode('utf-8').split(" ")
         time_now = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time.time()))
         cliente = line[1][line[1].find(":") + 1:line[1].rfind(":")]
+        print("El cliente ha mandado " + line[0])
 
         if not line[0] in SIP_metodo:
             msg = answer_code["Method Not Allowed"]
@@ -112,9 +119,7 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
                 self.register2json()
         elif line[0] == "INVITE":
             o = line[4][line[4].find("=") + 1:]
-            print(o)
             if self.find_user(o) is False:
-                print("no lo encuentro en la primera")
                 msg = answer_code["Unauthorized"]
             else:
                 cliente = line[1][line[1].find(":") + 1:]
@@ -124,11 +129,20 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
                     msg_to_send = " ".join(line)
                     msg = self.comunication(
                     msg_to_send, self.users[cliente]["ip"],
-                    self.users[cliente]["puerto"]
+                    self.users[cliente]["puerto"],
                     )
-
-        self.wfile.write(msg)
-        print("El cliente ha mandado " + line[0])
+        elif line[0] == "ACK":
+            cliente = line[1][line[1].find(":") + 1:]
+            msg_to_send = " ".join(line)
+            self.comunication_ack(
+            msg_to_send, self.users[cliente]["ip"],
+            self.users[cliente]["puerto"],
+            )
+            print("ACK enviado")
+        if line[0] =="ACK":
+            pass
+        else:
+            self.wfile.write(msg)
 
     def register2json(self):
         """Crea un archivo .json del dicionario de usuarios."""
