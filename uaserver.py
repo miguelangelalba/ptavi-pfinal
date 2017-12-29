@@ -79,6 +79,8 @@ if __name__ == "__main__":
     parser.setContentHandler(cHandler)
     parser.parse(open(CONFIG))
     CONF = cHandler.get_tags()
+    if CONF["uaserver_ip"] == "":
+        CONF["uaserver_ip"] = "127.0.0.1"
     print (CONF)
 
     serv = socketserver.UDPServer(
