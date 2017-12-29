@@ -33,7 +33,7 @@ def msg_constructor(metodo):
         content_type = "content_type: application/sdp" + "\r\n\r\n"
         v = "v=0" + " \r\n"
         o = "o=" + CONF["account_username"] + " " + CONF["uaserver_ip"] + \
-        "\r\n"
+        " \r\n"
         s = "s= misesion" + "\r\n"
         t = "t=0" + "\r\n"
         m = "m=audio " + CONF["rtpaudio_puerto"] + " RTP" + "\r\n"
