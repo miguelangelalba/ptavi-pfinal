@@ -4,6 +4,7 @@
 
 import socket
 import sys
+import os
 from xml.sax import make_parser
 from xml.sax.handler import ContentHandler
 from proxy_registrar import XMLHandler
@@ -75,10 +76,22 @@ def comunication():
             print('Recibido -- ', data.decode('utf-8'))
 
         else:
+            line = data.decode('utf-8').split(" ")
+            print ("Dir_ip_enviar " + line[7])
+            print ("Puerto a enviar: " + line[10])
+            ip = line[7]
+            puerto = line[10]
+            #Mando RTP UA
+            aEjecutar = "./mp32rtp -i "+ ip + " -p" + puerto + "< " + \
+            CONF["audio_path"]
+
+            #Mando ACK al server
             msg_to_send = msg_constructor("ACK")
             print("Enviando: " + msg_to_send)
             my_socket.send(bytes(msg_to_send, 'utf-8') + b'\r\n')
             data = my_socket.recv(1024)
+            print("Ejecutando:", aEjecutar)
+            os.system(aEjecutar)
             print('Recibido -- ', data.decode('utf-8'))
 
 
