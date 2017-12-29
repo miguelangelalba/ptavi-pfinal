@@ -23,7 +23,8 @@ answer_code = {
     "Unauthorized": b"SIP/2.0 401 Unauthorized\r\n" +
     b"www Authenticate: Digest nonce=8989898989898989898989898989 \r\n\r\n",
     "User Not Found": b"SIP/2.0 404 User Not Found\r\n\r\n",
-    "Method Not Allowed": b"SIP/2.0 405 Method Not Allowed\r\n\r\n"
+    "Method Not Allowed": b"SIP/2.0 405 Method Not Allowed\r\n\r\n",
+    "Service Unavailable": b"SIP/2.0 503 Service Unavailable\r\n\r\n"
     }
 
 SIP_type = {
@@ -50,7 +51,6 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
     def deluser(self, cliente, line, time_now):
 
         del_users = []
-        #cliente = line[1][line[1].find(":") + 1:line[1].rfind(":")]
         if int(line[3]) == 0:
             del self.users[cliente]
         self.wfile.write(b"SIP/2.0 200 OK\r\n\r\n")
@@ -61,7 +61,6 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
             del self.users[user]
 
     def registrarse(self, cliente, line):
-        #cliente = line[1][line[1].find(":") + 1:line[1].rfind(":")]
         puerto = line[1][line[1].rfind(":") + 1:]
         expires_time = time.gmtime(int(time.time()) + int(line[3]))
         usuario = {
@@ -86,7 +85,10 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
             my_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             my_socket.connect((ip, int(port)))
             my_socket.send(bytes(msg_to_send, 'utf-8') + b'\r\n')
-            return my_socket.recv(1024)
+            try:
+                return my_socket.recv(1024)
+            except ConnectionRefusedError:
+                return answer_code["Service Unavailable"]
 
     def handle(self):
         u"""Handle method of the server class.
@@ -107,7 +109,6 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
             if len(line) == 5:
                 msg = answer_code["Unauthorized"]
             else:
-                #falta el SDP
                 if int(line[3]) == 0:
                     self.registrarse(cliente, line)
                     self.deluser(cliente, line, time_now)
@@ -131,6 +132,18 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
                     msg_to_send, self.users[cliente]["ip"],
                     self.users[cliente]["puerto"],
                     )
+        elif line[0] == "BYE":
+            cliente = line[1][line[1].find(":") + 1:]
+            print (cliente)
+            if self.find_user(cliente) is False:
+                msg = answer_code["User Not Found"]
+            else:
+                msg_to_send = " ".join(line)
+                msg = self.comunication(
+                msg_to_send, self.users[cliente]["ip"],
+                self.users[cliente]["puerto"],
+                )
+
         elif line[0] == "ACK":
             cliente = line[1][line[1].find(":") + 1:]
             msg_to_send = " ".join(line)
@@ -138,7 +151,6 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
             msg_to_send, self.users[cliente]["ip"],
             self.users[cliente]["puerto"],
             )
-            print("ACK enviado")
         if line[0] =="ACK":
             pass
         else:
