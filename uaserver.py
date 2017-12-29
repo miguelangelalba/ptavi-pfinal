@@ -55,11 +55,13 @@ class SIPServer(socketserver.DatagramRequestHandler):
             print("ACK recibido ejecutando:", aEjecutar)
             os.system(aEjecutar)
             #self.wfile.write(msg)
+        elif line[0] == "BYE":
+            self.wfile.write(SIP_type["BYE"])
 
-
-        else:
-            self.wfile.write(SIP_type[line[0]])
-
+        #else:
+        #    msg = SIP_type[line[0]]
+            #self.wfile.write(SIP_type[line[0]])
+        #self.wfile.write(msg)
         print("El cliente ha mandado " + str(line))
 
 

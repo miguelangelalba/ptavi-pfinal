@@ -31,17 +31,21 @@ def msg_constructor(metodo):
     elif metodo == "INVITE":
         head = METHOD + " sip:" + OPTION + " SIP/2.0" + "\r\n"
         content_type = "content_type: application/sdp" + "\r\n\r\n"
-        v = "v=0" + "\r\n"
-        o = " o=" + CONF["account_username"] + " " + CONF["uaserver_ip"] + \
+        v = "v=0" + " \r\n"
+        o = "o=" + CONF["account_username"] + " " + CONF["uaserver_ip"] + \
         "\r\n"
         s = "s= misesion" + "\r\n"
         t = "t=0" + "\r\n"
         m = "m=audio " + CONF["rtpaudio_puerto"] + " RTP" + "\r\n"
         msg = head + content_type + v + o + s + t + m
     elif metodo == "ACK":
+        #No utilizo el global ya que el ACK se lo tengo que pasar por ser auto
         msg = metodo + " sip:" + OPTION + " SIP/2.0" + "\r\n"
     elif metodo == "BYE":
-        msg = METHOD + " sip:" + OPTION + "SIP/2.0" + "\r\n"
+        msg = METHOD + " sip:" + OPTION + " SIP/2.0" + "\r\n"
+    else:
+        #sys.exit(nswer_code["Method Not Allowed"]
+        sys.exit("405 Method Not Allowed --> " + METHOD )
 
     return msg
 
@@ -74,7 +78,16 @@ def comunication():
             my_socket.send(bytes(msg, 'utf-8') + b'\r\n')
             data = my_socket.recv(1024)
             print('Recibido -- ', data.decode('utf-8'))
-
+        elif data == answer_code["User Not Found"]:
+            pass
+        elif data == answer_code["Method Not Allowed"]:
+            pass
+        elif data == answer_code["Bad Request"]:
+            pass
+        elif data == answer_code["Ok"]:
+            pass
+        elif data == answer_code["Service Unavailable"]:
+            pass
         else:
             line = data.decode('utf-8').split(" ")
             print ("Dir_ip_enviar " + line[7])
