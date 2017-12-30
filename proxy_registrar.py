@@ -36,7 +36,15 @@ SIP_type = {
 
 SIP_metodo = ["INVITE", "BYE", "ACK", "REGISTER"]
 
-Log_type = ["Sent to","Received from","Error","Starting","Finishing","Other"]
+Log_type2 = ["Sent to","Received from","Error","Starting","Finishing","Other"]
+Log_type = {
+    "sent": " Sent to ",
+    "recv": " Received from ",
+    "err": " Error ",
+    "star": " Starting ",
+    "finis": " Finishing ",
+    "other": " Other "
+    }
 
 class Write_log(ContentHandler):
 
@@ -44,11 +52,12 @@ class Write_log(ContentHandler):
 
         return time.strftime("%Y%m%d%H%M%S", time.gmtime())
 
-    def log(self,fichero,tipo,mensaje):
+    def log(self, fichero, tipo, direccion, msg):
 
         time = self.time_now()
+        msg = msg.replace("\r\n", " ")
         with open(fichero, "a") as fichero_log:
-            fichero_log.write(mensaje)
+            fichero_log.write(time + Log_type[tipo] + direccion + msg + "\r\n")
 
 
 
@@ -213,6 +222,7 @@ if __name__ == "__main__":
     parser.setContentHandler(cHandler)
     parser.parse(open(CONFIG))
     CONF = cHandler.get_tags()
+    wr_log = Write_log()
     if CONF["server_ip"] == "":
         CONF["server_ip"] = "127.0.0.1"
     #print (CONF)
@@ -223,6 +233,7 @@ if __name__ == "__main__":
 
     print("Server " + CONF["server_name"] + " listening at port " +
     CONF["server_puerto"])
+    wr_log.log(CONF["log_path"],"star"," ","Starting \r\n casa")
 
     try:
         serv.serve_forever()
