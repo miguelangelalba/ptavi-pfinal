@@ -36,6 +36,21 @@ SIP_type = {
 
 SIP_metodo = ["INVITE", "BYE", "ACK", "REGISTER"]
 
+Log_type = ["Sent to","Received from","Error","Starting","Finishing","Other"]
+
+class Write_log(ContentHandler):
+
+    def time_now(self):
+
+        return time.strftime("%Y%m%d%H%M%S", time.gmtime())
+
+    def log(self,fichero,tipo,mensaje):
+
+        time = self.time_now()
+        with open(fichero, "a") as fichero_log:
+            fichero_log.write(mensaje)
+
+
 
 class SIPRegisterHandler(socketserver.DatagramRequestHandler):
     """Echo server class."""
