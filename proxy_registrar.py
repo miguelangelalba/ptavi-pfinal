@@ -39,7 +39,7 @@ SIP_metodo = ["INVITE", "BYE", "ACK", "REGISTER"]
 Log_type = {
     "sent": " Sent to ",
     "recv": " Received from ",
-    "err": " Error ",
+    "err": " Error: ",
     "star": " Starting... ",
     "finish": " Finishing. ",
     "other": " Other "
@@ -58,6 +58,8 @@ class Write_log(ContentHandler):
         if tipo == "star":
             pass
         elif tipo == "finish":
+            pass
+        elif tipo == "err":
             pass
         else:
             direccion = direccion + ": "

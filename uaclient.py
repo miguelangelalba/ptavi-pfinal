@@ -9,6 +9,7 @@ from xml.sax import make_parser
 from xml.sax.handler import ContentHandler
 from proxy_registrar import XMLHandler
 from proxy_registrar import answer_code
+from proxy_registrar import Write_log
 
 
 etiquetas = {
@@ -61,39 +62,50 @@ def comunication():
         my_socket.connect((CONF["regproxy_ip"], int(CONF["regproxy_puerto"])))
         msg_to_send = msg_constructor(METHOD)
         my_socket.send(bytes(msg_to_send, 'utf-8') + b'\r\n')
+        direccion = CONF["regproxy_ip"] + ":" + CONF["regproxy_puerto"]
+        wr_log.log(CONF["log_path"], "sent", direccion, msg_to_send)
+
         try:
             data = my_socket.recv(1024)
             print("Enviando: " + msg_to_send)
         except ConnectionRefusedError:
-            sys.exit(
-            "Error: No server listening at " + CONF["regproxy_ip"] + \
+            msg = "No server listening at " + CONF["regproxy_ip"] + \
             " port " + CONF["regproxy_puerto"]
-            )
+            wr_log.log(CONF["log_path"],"err"," ",msg)
+            sys.exit("Error: " + msg)
         print('Recibido -- ', data.decode('utf-8'))
+
+
         if data == answer_code["Unauthorized"]:
             ath = "Authorization: Digest response=123123212312321212123"
             msg = msg_constructor(METHOD) + ath
+            wr_log.log(CONF["log_path"], "sent", direccion, msg)
 
             print("Enviando: " + msg)
             my_socket.send(bytes(msg, 'utf-8') + b'\r\n')
             data = my_socket.recv(1024)
+            wr_log.log(CONF["log_path"],"recv",direccion,data.decode('utf-8'))
+
             print('Recibido -- ', data.decode('utf-8'))
         elif data == answer_code["User Not Found"]:
-            pass
+            wr_log.log(CONF["log_path"],"recv",direccion,data.decode('utf-8'))
         elif data == answer_code["Method Not Allowed"]:
-            pass
+            wr_log.log(CONF["log_path"],"recv",direccion,data.decode('utf-8'))
         elif data == answer_code["Bad Request"]:
-            pass
+            wr_log.log(CONF["log_path"],"recv",direccion,data.decode('utf-8'))
         elif data == answer_code["Ok"]:
-            pass
+            wr_log.log(CONF["log_path"],"recv",direccion,data.decode('utf-8'))
         elif data == answer_code["Service Unavailable"]:
-            pass
+            wr_log.log(CONF["log_path"],"recv",direccion,data.decode('utf-8'))
+
         else:
             line = data.decode('utf-8').split(" ")
+            wr_log.log(CONF["log_path"],"recv",direccion,data.decode('utf-8'))
             print ("Dir_ip_enviar " + line[7])
             print ("Puerto a enviar: " + line[10])
             ip = line[7]
             puerto = line[10]
+            #direccion = ip + ":" + puerto
             #Mando RTP UA
             aEjecutar = "./mp32rtp -i "+ ip + " -p" + puerto + "< " + \
             CONF["audio_path"]
@@ -101,6 +113,7 @@ def comunication():
             #Mando ACK al server
             msg_to_send = msg_constructor("ACK")
             print("Enviando: " + msg_to_send)
+            wr_log.log(CONF["log_path"],"sent", direccion , msg_to_send)
             my_socket.send(bytes(msg_to_send, 'utf-8') + b'\r\n')
             data = my_socket.recv(1024)
             print("Ejecutando:", aEjecutar)
@@ -128,6 +141,7 @@ if __name__ == '__main__':
         if CONF["uaserver_ip"] == "":
             CONF["uaserver_ip"] = "127.0.0.1"
         print(CONF)
+        wr_log = Write_log()
         comunication()
     except socket.gaierror:
         sys.exit("Usage: python uaclient.py config method option")
