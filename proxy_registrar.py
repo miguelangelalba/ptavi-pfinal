@@ -118,7 +118,7 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
             my_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             my_socket.connect((ip, int(port)))
             my_socket.send(bytes(msg_to_send, 'utf-8') + b'\r\n')
-            direccion = ip + ":" + port
+            direccion = ip + ":" + port + " "
             wr_log.log(CONF["log_path"], "sent", direccion, msg_to_send)
             try:
                 msg_rcv = my_socket.recv(1024)
