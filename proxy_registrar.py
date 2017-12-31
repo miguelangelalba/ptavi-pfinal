@@ -158,6 +158,8 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
 
         if not line[0] in SIP_metodo:
             msg = answer_code["Method Not Allowed"]
+            wr_log.log(CONF["log_path"], "sent", direccion, msg.decode('utf-8'))
+
         elif line[0] == "REGISTER":
             if len(line) == 5:
                 msg = answer_code["Unauthorized"]

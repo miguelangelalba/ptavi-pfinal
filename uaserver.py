@@ -10,6 +10,7 @@ from xml.sax.handler import ContentHandler
 from proxy_registrar import XMLHandler
 from uaclient import etiquetas
 from proxy_registrar import answer_code
+from proxy_registrar import Write_log
 
 SIP_type = {
     "INVITE": answer_code["Trying"] + answer_code["Ringing"] +
@@ -31,9 +32,15 @@ class SIPServer(socketserver.DatagramRequestHandler):
         con los diccionarios definidos arriba.
         """
         line = self.rfile.read().decode('utf-8').split(" ")
+        direccion = self.client_address[0] + ":" + str(self.client_address[1])
+        wr_log.log(CONF["log_path"], "recv", direccion,  " ".join(line))
+
         if not line[0] in SIP_type:
             print ("Metodo no encontrado")
-            self.wfile.write(answer_code["Method Not Allowed"])
+            msg = answer_code["Method Not Allowed"]
+            self.wfile.write(msg)
+            wr_log.log(CONF["log_path"], "sent", direccion, msg.decode('utf-8'))
+
         elif line[0] == "INVITE":
             print ("Imprimiendo esto: " + line[5])
             ip_to_send.insert(0,line[5])
@@ -49,6 +56,7 @@ class SIPServer(socketserver.DatagramRequestHandler):
             sdp = v + o + s + t + m
             msg = SIP_type["INVITE"] + bytes(sdp, 'utf-8')
             self.wfile.write(msg)
+            wr_log.log(CONF["log_path"], "sent", direccion, msg.decode('utf-8'))
 
         elif line[0] == "ACK":
             print ("Puerto ACK RTP:" + str(RTP_to_send[0]))
@@ -59,7 +67,10 @@ class SIPServer(socketserver.DatagramRequestHandler):
             os.system(aEjecutar)
             #self.wfile.write(msg)
         elif line[0] == "BYE":
-            self.wfile.write(SIP_type["BYE"])
+            msg = SIP_type["BYE"]
+            self.wfile.write(msg)
+            wr_log.log(CONF["log_path"], "sent", direccion, msg.decode('utf-8'))
+
 
         #else:
         #    msg = SIP_type[line[0]]
@@ -82,15 +93,19 @@ if __name__ == "__main__":
     if CONF["uaserver_ip"] == "":
         CONF["uaserver_ip"] = "127.0.0.1"
     print (CONF)
+    wr_log = Write_log()
 
     serv = socketserver.UDPServer(
         ('', int(CONF["uaserver_puerto"])), SIPServer
         )
 
     print("Listening...")
+    wr_log.log(CONF["log_path"],"star","","")
+
 
     try:
         serv.serve_forever()
 
     except KeyboardInterrupt:
+        wr_log.log(CONF["log_path"],"finish","","")
         print("Finalizado uaserver")
