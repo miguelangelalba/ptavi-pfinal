@@ -107,6 +107,9 @@ def comunication():
             puerto = line[10]
             #direccion = ip + ":" + puerto
             #Mando RTP UA
+            direccion1 = ip + ":" + puerto
+            msg = "Mensaje RTP"
+            wr_log.log(CONF["log_path"], "sent", direccion1, msg)
             aEjecutar = "./mp32rtp -i "+ ip + " -p" + puerto + "< " + \
             CONF["audio_path"]
 

@@ -60,6 +60,9 @@ class SIPServer(socketserver.DatagramRequestHandler):
 
         elif line[0] == "ACK":
             print ("Puerto ACK RTP:" + str(RTP_to_send[0]))
+            direccion = ip_to_send[0] + ":" + RTP_to_send[0]
+            msg = "Mensaje RTP"
+            wr_log.log(CONF["log_path"], "sent", direccion, msg)
             aEjecutar = "./mp32rtp -i " + ip_to_send[0] +  " -p" + \
             RTP_to_send[0] + "< " + \
             CONF["audio_path"]
