@@ -27,14 +27,14 @@ def msg_constructor(metodo):
     msg = ""
     if metodo == "REGISTER":
         msg = METHOD + " sip:" + CONF["account_username"] + ":" + \
-        CONF["uaserver_puerto"] + " SIP/2.0" + "\r\n" + \
-        "Expires: " + OPTION + " \r\n"
+            CONF["uaserver_puerto"] + " SIP/2.0" + "\r\n" + \
+            "Expires: " + OPTION + " \r\n"
     elif metodo == "INVITE":
         head = METHOD + " sip:" + OPTION + " SIP/2.0" + "\r\n"
         content_type = "content_type: application/sdp" + "\r\n\r\n"
         v = "v=0" + " \r\n"
         o = "o=" + CONF["account_username"] + " " + CONF["uaserver_ip"] + \
-        " \r\n"
+            " \r\n"
         s = "s= misesion" + "\r\n"
         t = "t=0" + "\r\n"
         m = "m=audio " + CONF["rtpaudio_puerto"] + " RTP" + "\r\n"
@@ -46,7 +46,7 @@ def msg_constructor(metodo):
         msg = METHOD + " sip:" + OPTION + " SIP/2.0" + "\r\n"
     else:
         #sys.exit(nswer_code["Method Not Allowed"]
-        sys.exit("405 Method Not Allowed --> " + METHOD )
+        sys.exit("405 Method Not Allowed --> " + METHOD)
 
     return msg
 
@@ -70,11 +70,10 @@ def comunication():
             print("Enviando: " + msg_to_send)
         except ConnectionRefusedError:
             msg = "No server listening at " + CONF["regproxy_ip"] + \
-            " port " + CONF["regproxy_puerto"]
-            wr_log.log(CONF["log_path"],"err"," ",msg)
+                " port " + CONF["regproxy_puerto"]
+            wr_log.log(CONF["log_path"], "err", " ", msg)
             sys.exit("Error: " + msg)
         print('Recibido -- ', data.decode('utf-8'))
-
 
         if data == answer_code["Unauthorized"]:
             ath = "Authorization: Digest response=123123212312321212123"
@@ -84,23 +83,37 @@ def comunication():
             print("Enviando: " + msg)
             my_socket.send(bytes(msg, 'utf-8') + b'\r\n')
             data = my_socket.recv(1024)
-            wr_log.log(CONF["log_path"],"recv",direccion,data.decode('utf-8'))
+            wr_log.log(
+                CONF["log_path"], "recv", direccion, data.decode('utf-8')
+                )
 
             print('Recibido -- ', data.decode('utf-8'))
         elif data == answer_code["User Not Found"]:
-            wr_log.log(CONF["log_path"],"recv",direccion,data.decode('utf-8'))
+            wr_log.log(
+                CONF["log_path"], "recv", direccion, data.decode('utf-8')
+                )
         elif data == answer_code["Method Not Allowed"]:
-            wr_log.log(CONF["log_path"],"recv",direccion,data.decode('utf-8'))
+            wr_log.log(
+                CONF["log_path"], "recv", direccion, data.decode('utf-8')
+                )
         elif data == answer_code["Bad Request"]:
-            wr_log.log(CONF["log_path"],"recv",direccion,data.decode('utf-8'))
+            wr_log.log(
+                CONF["log_path"], "recv", direccion, data.decode('utf-8')
+                )
         elif data == answer_code["Ok"]:
-            wr_log.log(CONF["log_path"],"recv",direccion,data.decode('utf-8'))
+            wr_log.log(
+                CONF["log_path"], "recv", direccion, data.decode('utf-8')
+                )
         elif data == answer_code["Service Unavailable"]:
-            wr_log.log(CONF["log_path"],"recv",direccion,data.decode('utf-8'))
+            wr_log.log(
+                CONF["log_path"], "recv", direccion, data.decode('utf-8')
+                )
 
         else:
             line = data.decode('utf-8').split(" ")
-            wr_log.log(CONF["log_path"],"recv",direccion,data.decode('utf-8'))
+            wr_log.log(
+                CONF["log_path"], "recv", direccion, data.decode('utf-8')
+                )
             print ("Dir_ip_enviar " + line[7])
             print ("Puerto a enviar: " + line[10])
             ip = line[7]
@@ -110,13 +123,13 @@ def comunication():
             direccion1 = ip + ":" + puerto
             msg = "Mensaje RTP"
             wr_log.log(CONF["log_path"], "sent", direccion1, msg)
-            aEjecutar = "./mp32rtp -i "+ ip + " -p" + puerto + "< " + \
-            CONF["audio_path"]
+            aEjecutar = "./mp32rtp -i " + ip + " -p" + puerto + "< " + \
+                CONF["audio_path"]
 
             #Mando ACK al server
             msg_to_send = msg_constructor("ACK")
             print("Enviando: " + msg_to_send)
-            wr_log.log(CONF["log_path"],"sent", direccion , msg_to_send)
+            wr_log.log(CONF["log_path"], "sent", direccion, msg_to_send)
             my_socket.send(bytes(msg_to_send, 'utf-8') + b'\r\n')
             data = my_socket.recv(1024)
             print("Ejecutando:", aEjecutar)
