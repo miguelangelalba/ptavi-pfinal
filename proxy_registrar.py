@@ -45,6 +45,7 @@ Log_type = {
     "other": " Other "
     }
 
+
 class Write_log(ContentHandler):
 
     def time_now(self):
@@ -66,7 +67,6 @@ class Write_log(ContentHandler):
 
         with open(fichero, "a") as fichero_log:
             fichero_log.write(time + Log_type[tipo] + direccion + msg + "\r\n")
-
 
 
 class SIPRegisterHandler(socketserver.DatagramRequestHandler):
@@ -123,22 +123,17 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
             try:
                 msg_rcv = my_socket.recv(1024)
                 wr_log.log(
-                CONF["log_path"],
-                "recv",
-                direccion,
-                msg_rcv.decode('utf-8')
+                    CONF["log_path"], "recv", direccion,
+                    msg_rcv.decode('utf-8')
                 )
                 return msg_rcv
 
             except ConnectionRefusedError:
                 wr_log.log(
-                CONF["log_path"],
-                "err",
-                direccion,
-                answer_code["Service Unavailable"].decode('utf-8')
+                    CONF["log_path"], "err", direccion,
+                    answer_code["Service Unavailable"].decode('utf-8')
                 )
                 return answer_code["Service Unavailable"]
-
 
     def handle(self):
         u"""Handle method of the server class.
@@ -158,7 +153,9 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
 
         if not line[0] in SIP_metodo:
             msg = answer_code["Method Not Allowed"]
-            wr_log.log(CONF["log_path"], "sent", direccion, msg.decode('utf-8'))
+            wr_log.log(
+                CONF["log_path"], "sent", direccion, msg.decode('utf-8')
+            )
 
         elif line[0] == "REGISTER":
             if len(line) == 5:
@@ -184,8 +181,8 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
                 else:
                     msg_to_send = " ".join(line)
                     msg = self.comunication(
-                    msg_to_send, self.users[cliente]["ip"],
-                    self.users[cliente]["puerto"],
+                        msg_to_send, self.users[cliente]["ip"],
+                        self.users[cliente]["puerto"],
                     )
         elif line[0] == "BYE":
             cliente = line[1][line[1].find(":") + 1:]
@@ -195,25 +192,26 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
             else:
                 msg_to_send = " ".join(line)
                 msg = self.comunication(
-                msg_to_send, self.users[cliente]["ip"],
-                self.users[cliente]["puerto"],
+                    msg_to_send, self.users[cliente]["ip"],
+                    self.users[cliente]["puerto"],
                 )
 
         elif line[0] == "ACK":
             cliente = line[1][line[1].find(":") + 1:]
             msg_to_send = " ".join(line)
             self.comunication_ack(
-            msg_to_send, self.users[cliente]["ip"],
-            self.users[cliente]["puerto"],
+                msg_to_send, self.users[cliente]["ip"],
+                self.users[cliente]["puerto"],
             )
-        if line[0] =="ACK":
+        if line[0] == "ACK":
             pass
         else:
             self.wfile.write(msg)
             #Al tener una lista de mensajes en bytes tengo que decodificarlos
             #para que quede constancia en el log
-            wr_log.log(CONF["log_path"], "sent", direccion, msg.decode('utf-8'))
-
+            wr_log.log(
+                CONF["log_path"], "sent", direccion, msg.decode('utf-8')
+            )
 
     def register2json(self):
         """Crea un archivo .json del dicionario de usuarios."""
@@ -261,17 +259,18 @@ if __name__ == "__main__":
     #print (CONF)
 
     #SIPRegisterHandler.json2registered()
-    serv = socketserver.UDPServer(('', int(CONF["server_puerto"])),
-    SIPRegisterHandler)
+    serv = socketserver.UDPServer(
+        ('', int(CONF["server_puerto"])), SIPRegisterHandler
+        )
 
     msg = "Server " + CONF["server_name"] + " listening at port " + \
-    CONF["server_puerto"]
+        CONF["server_puerto"]
     print (msg)
-    wr_log.log(CONF["log_path"],"star"," ",msg)
+    wr_log.log(CONF["log_path"], "star", " ", msg)
 
     try:
         serv.serve_forever()
 
     except KeyboardInterrupt:
         print("Finalizado proxy_registrar")
-        wr_log.log(CONF["log_path"],"finish"," ","")
+        wr_log.log(CONF["log_path"], "finish", " ", "")
