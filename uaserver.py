@@ -21,6 +21,7 @@ SIP_type = {
 ip_to_send = [""]
 RTP_to_send = [""]
 
+
 class SIPServer(socketserver.DatagramRequestHandler):
     """Echo server class."""
 
@@ -39,42 +40,45 @@ class SIPServer(socketserver.DatagramRequestHandler):
             print ("Metodo no encontrado")
             msg = answer_code["Method Not Allowed"]
             self.wfile.write(msg)
-            wr_log.log(CONF["log_path"], "sent", direccion, msg.decode('utf-8'))
+            wr_log.log(
+                CONF["log_path"], "sent", direccion, msg.decode('utf-8')
+            )
 
         elif line[0] == "INVITE":
             print ("Imprimiendo esto: " + line[5])
-            ip_to_send.insert(0,line[5])
-            RTP_to_send.insert(0,line[8])
+            ip_to_send.insert(0, line[5])
+            RTP_to_send.insert(0, line[8])
             print ("Puerto RTP:" + str(RTP_to_send[0]))
 
             v = "v=0" + "\r\n"
             o = "o=" + CONF["account_username"] + " " + CONF["uaserver_ip"] +\
-            " \r\n"
+                " \r\n"
             s = "s= misesion" + "\r\n"
             t = "t=0" + "\r\n"
             m = "m=audio " + CONF["rtpaudio_puerto"] + " RTP" + "\r\n"
             sdp = v + o + s + t + m
             msg = SIP_type["INVITE"] + bytes(sdp, 'utf-8')
             self.wfile.write(msg)
-            wr_log.log(CONF["log_path"], "sent", direccion, msg.decode('utf-8'))
+            wr_log.log(
+                CONF["log_path"], "sent", direccion, msg.decode('utf-8')
+            )
 
         elif line[0] == "ACK":
             print ("Puerto ACK RTP:" + str(RTP_to_send[0]))
             direccion = ip_to_send[0] + ":" + RTP_to_send[0]
             msg = "Mensaje RTP"
             wr_log.log(CONF["log_path"], "sent", direccion, msg)
-            aEjecutar = "./mp32rtp -i " + ip_to_send[0] +  " -p" + \
-            RTP_to_send[0] + "< " + \
-            CONF["audio_path"]
+            aEjecutar = "./mp32rtp -i " + ip_to_send[0] + " -p" + \
+                RTP_to_send[0] + "< " + CONF["audio_path"]
             print("ACK recibido ejecutando:", aEjecutar)
             os.system(aEjecutar)
             #self.wfile.write(msg)
         elif line[0] == "BYE":
             msg = SIP_type["BYE"]
             self.wfile.write(msg)
-            wr_log.log(CONF["log_path"], "sent", direccion, msg.decode('utf-8'))
-
-
+            wr_log.log(
+                CONF["log_path"], "sent", direccion, msg.decode('utf-8')
+            )
         #else:
         #    msg = SIP_type[line[0]]
             #self.wfile.write(SIP_type[line[0]])
@@ -97,18 +101,13 @@ if __name__ == "__main__":
         CONF["uaserver_ip"] = "127.0.0.1"
     print (CONF)
     wr_log = Write_log()
-
     serv = socketserver.UDPServer(
         ('', int(CONF["uaserver_puerto"])), SIPServer
         )
-
     print("Listening...")
-    wr_log.log(CONF["log_path"],"star","","")
-
-
+    wr_log.log(CONF["log_path"], "star", "", "")
     try:
         serv.serve_forever()
-
     except KeyboardInterrupt:
-        wr_log.log(CONF["log_path"],"finish","","")
+        wr_log.log(CONF["log_path"], "finish", "", "")
         print("Finalizado uaserver")
