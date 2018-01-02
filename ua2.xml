@@ -1,5 +1,5 @@
 <config>
-    <account username="alumno2@urjc.com" passwd="alumno2" />
+    <account username="alumno2@urjc.es" passwd="contrasena2" />
     <uaserver ip="127.0.0.1" puerto="3002" />
     <rtpaudio puerto="4002"/>
     <regproxy ip="127.0.0.1" puerto="5001"/>

@@ -7,6 +7,7 @@ import sys
 import time
 import json
 import csv
+import hashlib
 from xml.sax import make_parser
 from xml.sax.handler import ContentHandler
 
@@ -74,6 +75,16 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
     """Echo server class."""
     users = {}
     passwd = []
+
+    def generate_hash(self,passwd):
+        nonce=8989898989898989898989898989
+        h = hashlib.sha1()
+        h.hashlib.update(bytes(nonce, 'utf-8'))
+        h.hashlib.update(bytes(passwd, 'utf-8'))
+                
+        print (h.hexdigest())
+        return(h.hexdigest())
+
 
     @classmethod
     def read_passwd(self):
@@ -181,7 +192,9 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
             if len(line) == 5:
                 msg = answer_code["Unauthorized"]
                 print ("Contraseña: ")
-                print (self.find_pass_user(cliente))
+                passwd = self.find_pass_user(cliente)
+                print (passwd)
+                h = self.generate_hash(passwd)
             else:
                 if int(line[3]) == 0:
                     self.registrarse(cliente, line)
