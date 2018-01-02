@@ -6,6 +6,7 @@ import socketserver
 import sys
 import time
 import json
+import csv
 from xml.sax import make_parser
 from xml.sax.handler import ContentHandler
 
@@ -72,6 +73,21 @@ class Write_log(ContentHandler):
 class SIPRegisterHandler(socketserver.DatagramRequestHandler):
     """Echo server class."""
     users = {}
+    passwd = []
+
+    @classmethod
+    def read_passwd(self):
+        text = ""
+
+        with open("passwords.txt", "r") as fichero:
+            lines = fichero.readlines()
+
+        for line in lines:
+            text += line
+        text = text.replace("\n", " ")
+        self.passwd = text.split(" ")
+
+        print (self.passwd)
 
     def find_user(self, cliente):
 
@@ -79,6 +95,10 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
             return False
         else:
             return True
+    def find_pass_user(self,user):
+        if not user in self.passwd:
+            sys.exit("Falta usuario en el ficheror passwords.txt")
+        return self.passwd[self.passwd.index(user) + 1]
 
     def deluser(self, cliente, line, time_now):
 
@@ -160,11 +180,14 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
         elif line[0] == "REGISTER":
             if len(line) == 5:
                 msg = answer_code["Unauthorized"]
+                print ("Contraseña: ")
+                print (self.find_pass_user(cliente))
             else:
                 if int(line[3]) == 0:
                     self.registrarse(cliente, line)
                     self.deluser(cliente, line, time_now)
                     msg = answer_code["Ok"]
+
                 else:
                     self.registrarse(cliente, line)
                     self.deluser(cliente, line, time_now)
@@ -259,6 +282,7 @@ if __name__ == "__main__":
     #print (CONF)
 
     #SIPRegisterHandler.json2registered()
+    SIPRegisterHandler.read_passwd()
     serv = socketserver.UDPServer(
         ('', int(CONF["server_puerto"])), SIPRegisterHandler
         )
