@@ -5,6 +5,7 @@
 import socket
 import sys
 import os
+import hashlib
 from xml.sax import make_parser
 from xml.sax.handler import ContentHandler
 from proxy_registrar import XMLHandler
@@ -20,6 +21,10 @@ etiquetas = {
     "log": ["path"],
     "audio": ["path"]
 }
+#def generate_hash(nonce):
+#    h =hashlib.sha1()
+#    h.hashlib.update(bytes(nonce, 'utf-8'))
+#    h.hashlib.update(bytes(CONF["account_passwd"]))
 
 
 def msg_constructor(metodo):
@@ -74,8 +79,11 @@ def comunication():
             wr_log.log(CONF["log_path"], "err", " ", msg)
             sys.exit("Error: " + msg)
         print('Recibido -- ', data.decode('utf-8'))
-
-        if data == answer_code["Unauthorized"]:
+        line = data.decode('utf-8').split(" ")
+        if line[1] == "401":
+            #line = data.decode('utf-8').split(" ")
+            nonce = line[5]
+            print (nonce)
             ath = "Authorization: Digest response=123123212312321212123"
             msg = msg_constructor(METHOD) + ath
             wr_log.log(CONF["log_path"], "sent", direccion, msg)

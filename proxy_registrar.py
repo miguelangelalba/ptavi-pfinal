@@ -23,7 +23,7 @@ answer_code = {
     "Ok": b"SIP/2.0 200 OK\r\n\r\n",
     "Bad Request": b"SIP/2.0 400 Bad Request\r\n\r\n",
     "Unauthorized": b"SIP/2.0 401 Unauthorized\r\n" +
-    b"www Authenticate: Digest nonce=8989898989898989898989898989 \r\n\r\n",
+    b"www Authenticate: Digest nonce=",
     "User Not Found": b"SIP/2.0 404 User Not Found\r\n\r\n",
     "Method Not Allowed": b"SIP/2.0 405 Method Not Allowed\r\n\r\n",
     "Service Unavailable": b"SIP/2.0 503 Service Unavailable\r\n\r\n"
@@ -47,6 +47,7 @@ Log_type = {
     "other": " Other "
     }
 
+NONCE = 8989898989898989898989898989
 
 class Write_log(ContentHandler):
 
@@ -77,11 +78,10 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
     passwd = []
 
     def generate_hash(self,passwd):
-        nonce=8989898989898989898989898989
         h = hashlib.sha1()
-        h.hashlib.update(bytes(nonce, 'utf-8'))
-        h.hashlib.update(bytes(passwd, 'utf-8'))
-                
+        h.update(bytes(str(NONCE), 'utf-8'))
+        h.update(bytes(passwd, 'utf-8'))
+
         print (h.hexdigest())
         return(h.hexdigest())
 
@@ -190,7 +190,9 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
 
         elif line[0] == "REGISTER":
             if len(line) == 5:
-                msg = answer_code["Unauthorized"]
+                digest_nonce = b"'" + bytes(str(NONCE),'utf-8') + b"'"
+                msg = answer_code["Unauthorized"] + digest_nonce + b"\r\n\r\n"
+                #msg = answer_code["Unauthorized"]
                 print ("Contraseña: ")
                 passwd = self.find_pass_user(cliente)
                 print (passwd)
