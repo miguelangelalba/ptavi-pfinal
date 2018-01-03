@@ -79,14 +79,13 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
     NONCE = random.getrandbits(100)
 
     #hash_generated = ""
-    def generate_hash(self,passwd):
+    def generate_hash(self, passwd):
         h = hashlib.sha1()
         h.update(bytes(str(self.NONCE), 'utf-8'))
         h.update(bytes(passwd, 'utf-8'))
 
         print (h.hexdigest())
         return(h.hexdigest())
-
 
     @classmethod
     def read_passwd(self):
@@ -108,7 +107,8 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
             return False
         else:
             return True
-    def find_pass_user(self,user):
+
+    def find_pass_user(self, user):
         if not user in self.passwd:
             sys.exit("Falta usuario en el ficheror passwords.txt")
         return self.passwd[self.passwd.index(user) + 1]
@@ -192,7 +192,7 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
 
         elif line[0] == "REGISTER":
             if len(line) == 5:
-                digest_nonce = b"'" + bytes(str(self.NONCE),'utf-8') + b"'"
+                digest_nonce = b"'" + bytes(str(self.NONCE), 'utf-8') + b"'"
                 msg = answer_code["Unauthorized"] + digest_nonce + b"\r\n\r\n"
                 #msg = answer_code["Unauthorized"]
                 print ("Contraseña: ")

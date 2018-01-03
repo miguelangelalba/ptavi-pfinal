@@ -21,10 +21,12 @@ etiquetas = {
     "log": ["path"],
     "audio": ["path"]
 }
+
+
 def generate_hash(nonce):
     h = hashlib.sha1()
     h.update(bytes(nonce, 'utf-8'))
-    h.update(bytes(CONF["account_passwd"],'utf-8'))
+    h.update(bytes(CONF["account_passwd"], 'utf-8'))
     return(h.hexdigest())
 
 
