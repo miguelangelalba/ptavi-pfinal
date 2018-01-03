@@ -8,6 +8,7 @@ import time
 import json
 import csv
 import hashlib
+import random
 from xml.sax import make_parser
 from xml.sax.handler import ContentHandler
 
@@ -47,7 +48,6 @@ Log_type = {
     "other": " Other "
     }
 
-NONCE = 8989898989898989898989898989
 
 class Write_log(ContentHandler):
 
@@ -76,10 +76,12 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
     """Echo server class."""
     users = {}
     passwd = []
+    NONCE = random.getrandbits(100)
 
+    #hash_generated = ""
     def generate_hash(self,passwd):
         h = hashlib.sha1()
-        h.update(bytes(str(NONCE), 'utf-8'))
+        h.update(bytes(str(self.NONCE), 'utf-8'))
         h.update(bytes(passwd, 'utf-8'))
 
         print (h.hexdigest())
@@ -190,24 +192,34 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
 
         elif line[0] == "REGISTER":
             if len(line) == 5:
-                digest_nonce = b"'" + bytes(str(NONCE),'utf-8') + b"'"
+                digest_nonce = b"'" + bytes(str(self.NONCE),'utf-8') + b"'"
                 msg = answer_code["Unauthorized"] + digest_nonce + b"\r\n\r\n"
                 #msg = answer_code["Unauthorized"]
                 print ("Contraseña: ")
-                passwd = self.find_pass_user(cliente)
-                print (passwd)
-                h = self.generate_hash(passwd)
+                #passwd = self.find_pass_user(cliente)
+                #print (passwd)
+                #hash_generated = self.generate_hash(passwd)
             else:
-                if int(line[3]) == 0:
-                    self.registrarse(cliente, line)
-                    self.deluser(cliente, line, time_now)
-                    msg = answer_code["Ok"]
+                response = line[6][line[6].find("'") + 1:line[6].rfind("'")]
+                passwd = self.find_pass_user(cliente)
+                hash_generated = self.generate_hash(passwd)
 
+                print("Este es el response:" + response)
+                print ("ESte es el Hash generado:" + hash_generated)
+                if response == hash_generated:
+                    if int(line[3]) == 0:
+                        self.registrarse(cliente, line)
+                        self.deluser(cliente, line, time_now)
+                        msg = answer_code["Ok"]
+
+                    else:
+                        self.registrarse(cliente, line)
+                        self.deluser(cliente, line, time_now)
+                        msg = answer_code["Ok"]
+                    self.register2json()
                 else:
-                    self.registrarse(cliente, line)
-                    self.deluser(cliente, line, time_now)
-                    msg = answer_code["Ok"]
-                self.register2json()
+                    msg = answer_code["Bad Request"]
+
         elif line[0] == "INVITE":
             o = line[4][line[4].find("=") + 1:]
             if self.find_user(o) is False:

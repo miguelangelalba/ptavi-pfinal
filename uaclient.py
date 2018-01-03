@@ -21,10 +21,11 @@ etiquetas = {
     "log": ["path"],
     "audio": ["path"]
 }
-#def generate_hash(nonce):
-#    h =hashlib.sha1()
-#    h.hashlib.update(bytes(nonce, 'utf-8'))
-#    h.hashlib.update(bytes(CONF["account_passwd"]))
+def generate_hash(nonce):
+    h = hashlib.sha1()
+    h.update(bytes(nonce, 'utf-8'))
+    h.update(bytes(CONF["account_passwd"],'utf-8'))
+    return(h.hexdigest())
 
 
 def msg_constructor(metodo):
@@ -82,9 +83,12 @@ def comunication():
         line = data.decode('utf-8').split(" ")
         if line[1] == "401":
             #line = data.decode('utf-8').split(" ")
-            nonce = line[5]
+            line[1][line[1].find(":") + 1:line[1].rfind(":")]
+            nonce = line[5][line[5].find("'") + 1:line[5].rfind("'")]
             print (nonce)
-            ath = "Authorization: Digest response=123123212312321212123"
+            response = generate_hash(nonce)
+            print ("Hash crado:" + response)
+            ath = "Authorization: Digest response=" + "'" + response + "'"
             msg = msg_constructor(METHOD) + ath
             wr_log.log(CONF["log_path"], "sent", direccion, msg)
 
