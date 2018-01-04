@@ -219,7 +219,7 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
         elif line[0] == "INVITE":
             o = line[4][line[4].find("=") + 1:]
             if self.find_user(o) is False:
-                msg = answer_code["Unauthorized"]
+                msg = answer_code["Bad Request"]
             else:
                 cliente = line[1][line[1].find(":") + 1:]
                 if self.find_user(cliente) is False:
@@ -267,6 +267,7 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
                 fich_json,
                 sort_keys=True,
                 indent=4, separators=(',', ': '))
+
     # Gracias a esto puedo acceder al método desde el programa principal
     @classmethod
     def json2registered(self):
