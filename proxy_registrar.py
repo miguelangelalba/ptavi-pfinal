@@ -194,11 +194,7 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
             if len(line) == 5:
                 digest_nonce = b"'" + bytes(str(self.NONCE), 'utf-8') + b"'"
                 msg = answer_code["Unauthorized"] + digest_nonce + b"\r\n\r\n"
-                #msg = answer_code["Unauthorized"]
                 print ("Contraseña: ")
-                #passwd = self.find_pass_user(cliente)
-                #print (passwd)
-                #hash_generated = self.generate_hash(passwd)
             else:
                 response = line[6][line[6].find("'") + 1:line[6].rfind("'")]
                 passwd = self.find_pass_user(cliente)
@@ -271,6 +267,21 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
                 fich_json,
                 sort_keys=True,
                 indent=4, separators=(',', ': '))
+    # Gracias a esto puedo acceder al método desde el programa principal
+    @classmethod
+    def json2registered(self):
+        """Existencia archivo .json.
+
+        Comprueba la exstencia de un archivo .json para crear un diccionario
+        de usuarios a partir de este.
+        """
+        try:
+            fich_json = open("registered.json", "r")
+            self.users = json.load(fich_json)
+            # print("lo he pillado")
+            # print(self.users)
+        except:
+            self.users = {}
 
 
 class XMLHandler(ContentHandler):
@@ -308,7 +319,7 @@ if __name__ == "__main__":
         CONF["server_ip"] = "127.0.0.1"
     #print (CONF)
 
-    #SIPRegisterHandler.json2registered()
+    SIPRegisterHandler.json2registered()
     SIPRegisterHandler.read_passwd()
     serv = socketserver.UDPServer(
         ('', int(CONF["server_puerto"])), SIPRegisterHandler
