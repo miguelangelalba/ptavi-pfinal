@@ -6,6 +6,7 @@ import socket
 import sys
 import os
 import hashlib
+import threading
 from xml.sax import make_parser
 from xml.sax.handler import ContentHandler
 from proxy_registrar import XMLHandler
@@ -21,6 +22,14 @@ etiquetas = {
     "log": ["path"],
     "audio": ["path"]
 }
+
+def ejecutar_vlc():
+    print (CONF["rtpaudio_puerto"])
+        while run not False :
+
+            aEjecutar_vlc = "cvlc rtp://@" + CONF["uaserver_ip"] + ":" + \
+            CONF["rtpaudio_puerto"]
+            os.system(aEjecutar_vlc)
 
 
 def generate_hash(nonce):
@@ -134,6 +143,8 @@ def comunication():
             puerto = line[10]
             #direccion = ip + ":" + puerto
             #Mando RTP UA
+            hilo1 = threading.Thread(target=ejecutar_vlc)
+            hilo1.start()
             direccion1 = ip + ":" + puerto
             msg = "Mensaje RTP"
             wr_log.log(CONF["log_path"], "sent", direccion1, msg)
@@ -148,6 +159,7 @@ def comunication():
             data = my_socket.recv(1024)
             print("Ejecutando:", aEjecutar)
             os.system(aEjecutar)
+            #hilo1.stop()
             print('Recibido -- ', data.decode('utf-8'))
 
 
