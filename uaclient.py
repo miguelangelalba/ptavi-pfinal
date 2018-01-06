@@ -91,7 +91,8 @@ def comunication():
             print (nonce)
             response = generate_hash(nonce)
             print ("Hash crado:" + response)
-            ath = "Authorization: Digest response=" + "'" + response + "'"
+            ath = "Authorization: Digest response=" + "'" + response + "'" + \
+                "\r\n"
             msg = msg_constructor(METHOD) + ath
             wr_log.log(CONF["log_path"], "sent", direccion, msg)
 
