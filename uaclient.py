@@ -24,6 +24,7 @@ etiquetas = {
 
 
 def generate_hash(nonce):
+    """Generador de Hash."""
     h = hashlib.sha1()
     h.update(bytes(nonce, 'utf-8'))
     h.update(bytes(CONF["account_passwd"], 'utf-8'))

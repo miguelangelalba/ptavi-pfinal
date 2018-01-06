@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
+"""Programa principal de Proxy y servidor Registrer."""
 
 import socket
 import socketserver
@@ -50,13 +51,14 @@ Log_type = {
 
 
 class Write_log(ContentHandler):
+    """Clase para escribir logs."""
 
     def time_now(self):
-
+        u"""Método que saca la hora."""
         return time.strftime("%Y%m%d%H%M%S", time.gmtime())
 
     def log(self, fichero, tipo, direccion, msg):
-
+        u"""Método encargado de escribir el log según el tipo."""
         time = self.time_now()
         msg = msg.replace("\r\n", " ")
         if tipo == "star":
@@ -74,12 +76,14 @@ class Write_log(ContentHandler):
 
 class SIPRegisterHandler(socketserver.DatagramRequestHandler):
     """Echo server class."""
+
     users = {}
     passwd = []
     NONCE = random.getrandbits(100)
 
     #hash_generated = ""
     def generate_hash(self, passwd):
+        """Generador de Hash."""
         h = hashlib.sha1()
         h.update(bytes(str(self.NONCE), 'utf-8'))
         h.update(bytes(passwd, 'utf-8'))
@@ -89,6 +93,7 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
 
     @classmethod
     def read_passwd(self):
+        u"""Método encargado de leer las contraseñas almacenadas en el txt."""
         text = ""
 
         with open("passwords.txt", "r") as fichero:
@@ -102,19 +107,24 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
         print (self.passwd)
 
     def find_user(self, cliente):
-
+        u"""Método encargado de buscar usuarios guardados en la lista."""
         if not cliente in self.users.keys():
             return False
         else:
             return True
 
     def find_pass_user(self, user):
+        u"""Método encargado de encontrar la contraseña de un usuario."""
         if not user in self.passwd:
             sys.exit("Falta usuario en el ficheror passwords.txt")
         return self.passwd[self.passwd.index(user) + 1]
 
     def deluser(self, cliente, line, time_now):
+        u"""Borrar usuario.
 
+        Método encargada de borrar el usuario si pasa el tiempo estipulado o
+        llega un REGISTER = 0.
+        """
         del_users = []
         if int(line[3]) == 0:
             del self.users[cliente]
@@ -126,6 +136,7 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
             del self.users[user]
 
     def registrarse(self, cliente, line):
+        u"""Metodo encargado de añadir el usuario a la lista."""
         puerto = line[1][line[1].rfind(":") + 1:]
         expires_time = time.gmtime(int(time.time()) + int(line[3]))
         usuario = {
@@ -138,6 +149,7 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
         print (self.users)
 
     def comunication_ack(self, msg_to_send, ip, port):
+        u"""Método encargado de reenviar los mensajes ack."""
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as my_socket:
             print("Mandando ACK")
             my_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -147,6 +159,7 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
             wr_log.log(CONF["log_path"], "sent", direccion, msg_to_send)
 
     def comunication(self, msg_to_send, ip, port):
+        u"""Método encargado de reenviar los mensajes que no sean ack."""
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as my_socket:
             my_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             my_socket.connect((ip, int(port)))
@@ -286,15 +299,19 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
 
 
 class XMLHandler(ContentHandler):
-    """Constructor XML"""
+    """Constructor XML."""
+
     def __init__(self, etique):
+        u"""Definición de listas necesarias en la clase."""
         self.XML = {}
         self.etiquetas = etique
 
     def get_tags(self):
+        u"""Método que obtiene las etiquetas."""
         return self.XML
 
     def startElement(self, name, attrs):
+        u""""Método que extrae las etiquetas del xml."""
         if name not in self.etiquetas.keys():
             return
 
