@@ -24,7 +24,7 @@ answer_code = {
     "Ringing": b"SIP/2.0 180 Ringing\r\n\r\n",
     "Ok": b"SIP/2.0 200 OK\r\n\r\n",
     "Bad Request": b"SIP/2.0 400 Bad Request\r\n\r\n",
-    "Unauthorized": b"SIP/2.0 401 Unauthorized\r\n" +
+    "Unauthorized": b"SIP/2.0 401 Unauthorized\r\n\r\n" +
     b"www Authenticate: Digest nonce=",
     "User Not Found": b"SIP/2.0 404 User Not Found\r\n\r\n",
     "Method Not Allowed": b"SIP/2.0 405 Method Not Allowed\r\n\r\n",

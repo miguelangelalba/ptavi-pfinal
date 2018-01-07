@@ -40,7 +40,7 @@ def msg_constructor(metodo):
             "Expires: " + OPTION + " \r\n"
     elif metodo == "INVITE":
         head = METHOD + " sip:" + OPTION + " SIP/2.0" + "\r\n"
-        content_type = "content_type: application/sdp" + "\r\n\r\n"
+        content_type = "Content-Type: application/sdp" + "\r\n\r\n"
         v = "v=0" + " \r\n"
         o = "o=" + CONF["account_username"] + " " + CONF["uaserver_ip"] + \
             " \r\n"
