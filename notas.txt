@@ -1,0 +1,10 @@
+----------------Considerar frente a valores erróneos----------------
+
+En este apartado sólo he hecho estos dos casos:
+
+-Si se le manda un INVITE y el usuario no está autenticado el proxy manda al cliente un 400 Bad Request
+
+-En caso de que UAServer no esté encendido y se le haga un INVITE, el cliente recibirá: 503 Service Unavailable
+
+
+--------------------------------------------------------------------
